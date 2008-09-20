@@ -250,14 +250,27 @@ module Thoughtbot # :nodoc:
 
         context = self
         test_unit_class.send(:define_method, test_name) do
-          begin
-            context.run_parent_setup_blocks(self)
-            should[:before].bind(self).call if should[:before]
-            context.run_current_setup_blocks(self)
-            should[:block].bind(self).call
-          ensure
-            context.run_all_teardown_blocks(self)
+          context.benchmark(test_name) do
+            begin
+              context.benchmark("\n   parents ") { context.run_parent_setup_blocks(self) }
+              context.benchmark("    before ") { should[:before].bind(self).call } if should[:before]
+              context.benchmark("     setup ") { context.run_current_setup_blocks(self) }
+              context.benchmark("    should ") { should[:block].bind(self).call }
+            ensure
+              context.benchmark("  teardown ") { context.run_all_teardown_blocks(self) }
+            end
           end
+        end
+      end
+      
+      def benchmark(title, benchmark = ENV["BENCHMARK"])
+        if benchmark
+          result = nil
+          seconds = Benchmark.realtime { result = yield }
+          puts "#{title} (#{'%.5f' % seconds})"
+          result
+        else
+          yield
         end
       end
 

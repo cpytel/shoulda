@@ -262,5 +262,42 @@ class ShouldTest < Test::Unit::TestCase # :nodoc:
       end
     end
   end
+  
+  # Benchmarking
+  
+  def test_should_benchmark_when_benchmarking
+    ENV.expects(:"[]").with("BENCHMARK").returns true
+    tu_class = Test::Unit::TestCase
+    context = Thoughtbot::Shoulda::Context.new("A Context", tu_class) do
+      should "define the benchmark test" do; end
+    end
+
+    context.build
+    context.expects("benchmark").with("test: A Context should define the benchmark test. ")
+    tu_class.new("test: A Context should define the benchmark test. ").run(Test::Unit::TestResult.new) do; end
+  end
+  
+  def test_benchmark_should_execute_block
+    ENV.expects(:"[]").with("BENCHMARK").returns true
+    context = Thoughtbot::Shoulda::Context.new("name", self) do; end
+    block_executed = false
+    context.stubs(:puts)
+    context.benchmark("test") { block_executed = true }
+    assert block_executed
+  end
+  
+  def test_benchmark_should_print_when_benchmarking
+    ENV.expects(:"[]").with("BENCHMARK").returns true
+    context = Thoughtbot::Shoulda::Context.new("name", self) do; end
+    context.expects(:puts).with("test (0.00000)")
+    context.benchmark("test") {}
+  end
+  
+  def text_benchmark_should_not_print_when_benchmarking
+    ENV.expects(:"[]").with("BENCHMARK").returns false
+    context = Thoughtbot::Shoulda::Context.new("name", self) do; end
+    context.expects(:puts).never
+    context.benchmark("test") {}
+  end
 
 end
