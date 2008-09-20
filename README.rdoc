@@ -123,6 +123,10 @@ Any *.rb file under RAILS_ROOT/test/shoulda_macros/ or vendor/(plugins|gems)/gem
     end
   end
 
+=== Benchmarking
+
+By setting the BENCHMARK environment variable to true when running your tests, additional information about the performance of your tests will be printed.
+
 = Credits
 
 Shoulda is maintained by {Tammer Saleh}[mailto:tsaleh@thoughtbot.com], and is funded by Thoughtbot[http://www.thoughtbot.com], inc.
